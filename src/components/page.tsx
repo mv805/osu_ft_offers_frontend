@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
+import { Suspense } from "react";
 import {
   Card,
   TextInput,
@@ -42,8 +43,8 @@ interface FormValues {
   idOfferSource: number | null;
   idOfficeLocation: number | null;
   idWorkArrangement: number | null;
-  //   idPriorExperience: number | null;
-  //   idPreviousDegree: number | null;
+  idPriorExperience: number | null;
+  idPreviousDegree: number | null;
 }
 
 type AddOfferProps = {
@@ -65,8 +66,8 @@ const AddOffer: React.FC<AddOfferProps> = ({ port }) => {
     idOfferSource: null,
     idOfficeLocation: null,
     idWorkArrangement: null,
-    // idPriorExperience: null,
-    // idPreviousDegree: null,
+    idPriorExperience: null,
+    idPreviousDegree: null,
   });
 
   const [gpaInputValue, setGpaInputValue] = useState("");
@@ -490,6 +491,42 @@ const AddOffer: React.FC<AddOfferProps> = ({ port }) => {
               idField="idWorkArrangement"
               onValueChange={(arrangementId) => {
                 handleInputChange("idWorkArrangement", arrangementId);
+              }}
+              className="mt-2"
+            />
+          </div>
+          <div className="col-span-full sm:col-span-3">
+            <label
+              htmlFor="prior-experience"
+              className="text-tremor-default font-medium text-tremor-content-strong dark:text-dark-tremor-content-strong"
+            >
+              Prior Experience
+            </label>
+            <DataSelector
+              htmlId="prior-experience"
+              url={`http://localhost:${port}/api/previous-experiences/`}
+              displayField="experienceType"
+              idField="idPriorExperience"
+              onValueChange={(experienceId) => {
+                handleInputChange("idPriorExperience", experienceId);
+              }}
+              className="mt-2"
+            />
+          </div>
+          <div className="col-span-full sm:col-span-3">
+            <label
+              htmlFor="previous-degree"
+              className="text-tremor-default font-medium text-tremor-content-strong dark:text-dark-tremor-content-strong"
+            >
+              Previous Degree
+            </label>
+            <DataSelector
+              htmlId="previous-degree"
+              url={`http://localhost:${port}/api/previous-degrees/`}
+              displayField="degreeType"
+              idField="idPreviousDegree"
+              onValueChange={(previousDegreeID) => {
+                handleInputChange("idPreviousDegree", previousDegreeID);
               }}
               className="mt-2"
             />
