@@ -51,25 +51,26 @@ type AddOfferProps = {
   port: number;
 };
 
-const AddOffer: React.FC<AddOfferProps> = ({ port }) => {
-  const [formValues, setFormValues] = useState<FormValues>({
-    userName: "",
-    offerDate: "",
-    personalProject: 0,
-    returnship: 0,
-    timeInProgram: 1.0,
-    salary: null,
-    gpa: null,
-    swePosition: 1,
-    bigTechOffer: 0,
-    ageOfCandidate: null,
-    idOfferSource: null,
-    idOfficeLocation: null,
-    idWorkArrangement: null,
-    idPriorExperience: null,
-    idPreviousDegree: null,
-  });
+const initialValues = {
+  userName: "",
+  offerDate: "",
+  personalProject: 0,
+  returnship: 0,
+  timeInProgram: 1.0,
+  salary: null,
+  gpa: null,
+  swePosition: 1,
+  bigTechOffer: 0,
+  ageOfCandidate: null,
+  idOfferSource: null,
+  idOfficeLocation: null,
+  idWorkArrangement: null,
+  idPriorExperience: null,
+  idPreviousDegree: null,
+};
 
+const AddOffer: React.FC<AddOfferProps> = ({ port }) => {
+  const [formValues, setFormValues] = useState<FormValues>(initialValues);
   const [gpaInputValue, setGpaInputValue] = useState("");
   const [timeInProgramValue, setTimeInProgramValue] = useState("1.00");
 
@@ -202,6 +203,13 @@ const AddOffer: React.FC<AddOfferProps> = ({ port }) => {
         setTimeInProgramValue(clampedAndFormattedNumber);
       }
     }
+  };
+
+  const resetForm = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    setFormValues({
+      ...initialValues,
+    });
   };
 
   useEffect(() => {
@@ -449,6 +457,7 @@ const AddOffer: React.FC<AddOfferProps> = ({ port }) => {
               Office Location
             </label>
             <DataSelector
+              value={formValues.idOfficeLocation}
               htmlId="office-location"
               url={`http://localhost:${port}/api/office-locations/`}
               displayField="fullName"
@@ -467,6 +476,7 @@ const AddOffer: React.FC<AddOfferProps> = ({ port }) => {
               Offer Source
             </label>
             <DataSelector
+              value={formValues.idOfferSource}
               htmlId="offer-source"
               url={`http://localhost:${port}/api/offer-sources/`}
               displayField="type"
@@ -485,6 +495,7 @@ const AddOffer: React.FC<AddOfferProps> = ({ port }) => {
               Work Arrangement
             </label>
             <DataSelector
+              value={formValues.idWorkArrangement}
               htmlId="work-arrangement"
               url={`http://localhost:${port}/api/work-arrangements/`}
               displayField="arrangement"
@@ -503,6 +514,7 @@ const AddOffer: React.FC<AddOfferProps> = ({ port }) => {
               Prior Experience
             </label>
             <DataSelector
+              value={formValues.idPriorExperience}
               htmlId="prior-experience"
               url={`http://localhost:${port}/api/previous-experiences/`}
               displayField="experienceType"
@@ -521,6 +533,7 @@ const AddOffer: React.FC<AddOfferProps> = ({ port }) => {
               Previous Degree
             </label>
             <DataSelector
+              value={formValues.idPreviousDegree}
               htmlId="previous-degree"
               url={`http://localhost:${port}/api/previous-degrees/`}
               displayField="degreeType"
@@ -536,9 +549,10 @@ const AddOffer: React.FC<AddOfferProps> = ({ port }) => {
           <div className="flex items-center justify-end space-x-4">
             <button
               type="button"
+              onClick={resetForm}
               className="whitespace-nowrap rounded-tremor-small px-4 py-2.5 text-tremor-default font-medium text-tremor-content-strong dark:text-dark-tremor-content-strong"
             >
-              Cancel
+              Reset
             </button>
             <button
               type="submit"

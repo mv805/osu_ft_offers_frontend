@@ -8,6 +8,7 @@ type DataItem = {
 };
 
 type DataSelectorProps = {
+  value: number | null;
   url: string;
   displayField: string;
   idField: string;
@@ -26,11 +27,12 @@ type DataSelectorProps = {
  * @param {string} props.idField - The database field to use as the value when an item is selected. Should be primary key value.
  * @param {Function} props.onValueChange - The callback function to be called when a value is selected.
  * @param {string} props.htmlId - The HTML id attribute for the dropdown. USed to identify the unique react component key field. ( correlates to id="someID")
- * @param {string} props.className - The CSS class name(s) for the dropdown. Optional. 
+ * @param {string} props.className - The CSS class name(s) for the dropdown. Optional.
  * @returns {JSX.Element} The rendered data selector dropdown.
  */
 
 const DataSelector: React.FC<DataSelectorProps> = ({
+  value,
   url,
   displayField,
   idField,
@@ -50,6 +52,15 @@ const DataSelector: React.FC<DataSelectorProps> = ({
     }
   };
 
+const setViewValue = () => {
+  if (value === null) {
+    return "N/A";
+  } else {
+    const item = dataItems.find((item) => item[idField] === value);
+    return item ? item[displayField] : "N/A";
+  }
+};
+
   useEffect(() => {
     fetch(url)
       .then((response) => response.json())
@@ -65,7 +76,7 @@ const DataSelector: React.FC<DataSelectorProps> = ({
   ) : (
     <Select
       className={classNameFromParent ? classNameFromParent : ""}
-      defaultValue="N/A"
+      value={setViewValue()}
       onValueChange={findIdHandler}
       id={htmlId ? htmlId : ""}
     >
