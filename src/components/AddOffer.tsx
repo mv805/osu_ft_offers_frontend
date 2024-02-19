@@ -138,9 +138,10 @@ const AddOffer: React.FC<AddOfferProps> = ({ port }) => {
       });
       return;
     }
-    const year = newDate.getFullYear();
-    const month = newDate.getMonth() + 1; // getMonth() returns a zero-based month, so add 1
-    const date = newDate.getDate();
+
+    const year = newDate.getUTCFullYear();
+    const month = newDate.getUTCMonth() + 1; // getMonth() returns a zero-based month, so add 1
+    const date = newDate.getUTCDate();
 
     let formattedDate = `${year}-${month.toString().padStart(2, "0")}-${date
       .toString()
@@ -285,7 +286,7 @@ const AddOffer: React.FC<AddOfferProps> = ({ port }) => {
                 className="mt-2"
                 value={
                   formValues.offerDate
-                    ? new Date(formValues.offerDate)
+                    ? new Date(formValues.offerDate + "T00:00")
                     : new Date()
                 }
                 onValueChange={handleDateChange}
