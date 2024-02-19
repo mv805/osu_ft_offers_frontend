@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
+import { RiAlarmWarningLine } from "@remixicon/react";
 import { Suspense } from "react";
 import {
   Card,
@@ -10,8 +11,10 @@ import {
   DatePicker,
   DatePickerValue,
   NumberInput,
+  Callout,
 } from "@tremor/react";
 import DataSelector from "./DataSelector";
+import { FormValues } from "../../dataTypes";
 // {
 //     "userName": "testname",
 //     "offerDate": "2021-05-08",
@@ -29,23 +32,6 @@ import DataSelector from "./DataSelector";
 //     "idPriorExperience": 1,
 //     "idPreviousDegree": 1
 // }
-interface FormValues {
-  userName: string;
-  offerDate: string;
-  personalProject: number;
-  returnship: number;
-  timeInProgram: number | null;
-  salary: number | null;
-  gpa: number | null;
-  swePosition: number;
-  bigTechOffer: number;
-  ageOfCandidate: number | null;
-  idOfferSource: number | null;
-  idOfficeLocation: number | null;
-  idWorkArrangement: number | null;
-  idPriorExperience: number | null;
-  idPreviousDegree: number | null;
-}
 
 type AddOfferProps = {
   port: number;
@@ -53,7 +39,7 @@ type AddOfferProps = {
 
 const initialValues = {
   userName: "",
-  offerDate: "",
+  offerDate: new Date().toISOString().split("T")[0],
   personalProject: 0,
   returnship: 0,
   timeInProgram: 1.0,
@@ -73,7 +59,41 @@ const AddOffer: React.FC<AddOfferProps> = ({ port }) => {
   const [formValues, setFormValues] = useState<FormValues>(initialValues);
   const [gpaInputValue, setGpaInputValue] = useState("");
   const [timeInProgramValue, setTimeInProgramValue] = useState("1.00");
+  const [error, setError] = useState<string | null>(null);
+  const [lastOfferID, setLastOfferID] = useState<number | null>(null);
 
+  const handleFormSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+
+    try {
+      const response = await fetch("http://localhost:3030/api/offers/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formValues),
+      });
+
+      if (!response.ok) {
+        const errorMessage = await response.text();
+        throw new Error(`HTTP error, response not ok: ${errorMessage}`);
+      }
+
+      const data = await response.json();
+      setLastOfferID(data.newOfferId);
+    } catch (error) {
+      if (error instanceof Error) {
+        console.error(
+          "An error occurred while making the POST request:",
+          error.message
+        );
+        setError(error.message);
+      } else {
+        console.error("An unknown error occurred:", error);
+        setError("An Unknown Error Occured.");
+      }
+    }
+  };
   /**
    * Handles the change event of an input element and updates the state.
    * @param e - The change event object.
@@ -114,7 +134,7 @@ const AddOffer: React.FC<AddOfferProps> = ({ port }) => {
     if (!newDate) {
       setFormValues({
         ...formValues,
-        offerDate: "",
+        offerDate: new Date().toISOString().split("T")[0],
       });
       return;
     }
@@ -210,6 +230,10 @@ const AddOffer: React.FC<AddOfferProps> = ({ port }) => {
     setFormValues({
       ...initialValues,
     });
+    setTimeInProgramValue("1.00");
+    setGpaInputValue("");
+    setError(null);
+    setLastOfferID(null);
   };
 
   useEffect(() => {
@@ -225,7 +249,7 @@ const AddOffer: React.FC<AddOfferProps> = ({ port }) => {
         <p className="mt-1 text-tremor-default leading-6 text-tremor-content dark:text-dark-tremor-content">
           This is where you put the new offer data points
         </p>
-        <form action="#" method="post" className="mt-8">
+        <form className="mt-8" onSubmit={handleFormSubmit}>
           <div className="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-6">
             <div className="col-span-full sm:col-span-3">
               <label
@@ -259,6 +283,11 @@ const AddOffer: React.FC<AddOfferProps> = ({ port }) => {
               <DatePicker
                 id="offer-date"
                 className="mt-2"
+                value={
+                  formValues.offerDate
+                    ? new Date(formValues.offerDate)
+                    : new Date()
+                }
                 onValueChange={handleDateChange}
               />
             </div>
@@ -280,7 +309,7 @@ const AddOffer: React.FC<AddOfferProps> = ({ port }) => {
               </label>
               <Select
                 id="projects"
-                defaultValue="0"
+                value={formValues.personalProject === 1 ? "1" : "0"}
                 onValueChange={(value) => {
                   handleYesNoChange("personalProject", value);
                 }}
@@ -303,7 +332,7 @@ const AddOffer: React.FC<AddOfferProps> = ({ port }) => {
               </label>
               <Select
                 id="returnship"
-                defaultValue="0"
+                value={formValues.returnship === 1 ? "1" : "0"}
                 onValueChange={(value) => {
                   handleYesNoChange("returnship", value);
                 }}
@@ -327,7 +356,7 @@ const AddOffer: React.FC<AddOfferProps> = ({ port }) => {
               </label>
               <Select
                 id="swe-position"
-                defaultValue="1"
+                value={formValues.swePosition === 1 ? "1" : "0"}
                 onValueChange={(value) => {
                   handleYesNoChange("swePosition", value);
                 }}
@@ -349,7 +378,7 @@ const AddOffer: React.FC<AddOfferProps> = ({ port }) => {
               </label>
               <Select
                 id="big-tech-offer"
-                defaultValue="0"
+                value={formValues.bigTechOffer === 1 ? "1" : "0"}
                 onValueChange={(value) => {
                   handleYesNoChange("bigTechOffer", value);
                 }}
@@ -561,6 +590,26 @@ const AddOffer: React.FC<AddOfferProps> = ({ port }) => {
               Submit
             </button>
           </div>
+          {error && (
+            <Callout
+              className="mt-4"
+              title="Submit Error"
+              icon={RiAlarmWarningLine}
+              color="rose"
+            >
+              {`${error}`}
+            </Callout>
+          )}
+          {lastOfferID && (
+            <Callout
+              className="mt-4"
+              title="Success!"
+              icon={RiAlarmWarningLine}
+              color="teal"
+            >
+              {`Last Offer input ID: ${lastOfferID}`}
+            </Callout>
+          )}
         </form>
       </div>
     </Card>
