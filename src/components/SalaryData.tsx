@@ -2,10 +2,7 @@ import {
   fetchAllAverageSalaries,
   fetchAllSalariesByGrouping,
 } from "@/app/data-fetch/data";
-import { Card, Divider, BarChart, ValueFormatter } from "@tremor/react";
-
-const dataFormatter = (number: number) =>
-  Intl.NumberFormat("us").format(number).toString();
+import { Card, Divider, BarChart } from "@tremor/react";
 
 export async function SalaryData() {
   const allAverageSalaries = await fetchAllAverageSalaries();
