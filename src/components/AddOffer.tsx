@@ -127,10 +127,12 @@ const AddOffer: React.FC<AddOfferProps> = ({ port }) => {
 
   /**
    * Handles the change of the date picker value.
-   * @param {DatePickerValue} newDate - The new date value selected.
+   * @param {React.ChangeEvent<HTMLInputElement>} event - The new date value selected.
    * @returns {void}
    */
-  const handleDateChange = (newDate: DatePickerValue) => {
+  const handleDateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const newDate = event.target.value; // This will be a string in the format 'yyyy-mm-dd'
+
     if (!newDate) {
       setFormValues({
         ...formValues,
@@ -139,17 +141,9 @@ const AddOffer: React.FC<AddOfferProps> = ({ port }) => {
       return;
     }
 
-    const year = newDate.getUTCFullYear();
-    const month = newDate.getUTCMonth() + 1; // getMonth() returns a zero-based month, so add 1
-    const date = newDate.getUTCDate();
-
-    let formattedDate = `${year}-${month.toString().padStart(2, "0")}-${date
-      .toString()
-      .padStart(2, "0")}`;
-
     setFormValues({
       ...formValues,
-      offerDate: formattedDate,
+      offerDate: newDate,
     });
   };
 
@@ -281,7 +275,19 @@ const AddOffer: React.FC<AddOfferProps> = ({ port }) => {
                 Offer Date
                 <span className="text-red-500">*</span>
               </label>
-              <DatePicker
+              <input
+                  aria-label="Date"
+                  type="date"
+                  id="offer-date"
+                  className="mt-2"
+                  value={
+                    formValues.offerDate
+                      ? new Date(formValues.offerDate + "T00:00").toISOString().split('T')[0]
+                      : new Date().toISOString().split('T')[0]
+                  }
+                  onChange={handleDateChange}
+              />
+              {/* <DatePicker
                 id="offer-date"
                 className="mt-2"
                 value={
@@ -290,11 +296,11 @@ const AddOffer: React.FC<AddOfferProps> = ({ port }) => {
                     : new Date()
                 }
                 onValueChange={handleDateChange}
-              />
+              /> */}
             </div>
           </div>
           <Divider className="col-span-full">
-            Enter some more mandatory data
+            Enter some offer data
           </Divider>
           <div className="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-6">
             <div className="col-span-full sm:col-span-3">
@@ -388,28 +394,86 @@ const AddOffer: React.FC<AddOfferProps> = ({ port }) => {
                 <SelectItem value="0">No</SelectItem>
               </Select>
             </div>
+            <div className="col-span-full sm:col-span-3">
+              <label
+                htmlFor="salary"
+                className="text-tremor-default font-medium text-tremor-content-strong dark:text-dark-tremor-content-strong"
+              >
+                Salary
+              </label>
+              <TextInput
+                type="text"
+                id="salary"
+                name="salary"
+                placeholder="Salary"
+                value={formValues.salary ? formValues.salary.toString() : ""}
+                onChange={(e) => {
+                  handleNumberChange("salary", e.target.value);
+                }}
+                className="mt-2"
+              />
+            </div>
+            <div className="col-span-full sm:col-span-3">
+              <label
+                htmlFor="office-location"
+                className="text-tremor-default font-medium text-tremor-content-strong dark:text-dark-tremor-content-strong"
+              >
+                Office Location
+              </label>
+              <DataSelector
+                value={formValues.idOfficeLocation}
+                htmlId="office-location"
+                url={`http://localhost:${port}/api/office-locations/`}
+                displayField="fullName"
+                idField="idOfficeLocation"
+                onValueChange={(locationId) => {
+                  handleInputChange("idOfficeLocation", locationId);
+                }}
+                className="mt-2"
+              />
+            </div>
+            <div className="col-span-full sm:col-span-3">
+              <label
+                htmlFor="offer-source"
+                className="text-tremor-default font-medium text-tremor-content-strong dark:text-dark-tremor-content-strong"
+              >
+                Offer Source
+              </label>
+              <DataSelector
+                value={formValues.idOfferSource}
+                htmlId="offer-source"
+                url={`http://localhost:${port}/api/offer-sources/`}
+                displayField="type"
+                idField="idOfferSource"
+                onValueChange={(typeId) => {
+                  handleInputChange("idOfferSource", typeId);
+                }}
+                className="mt-2"
+              />
+            </div>
+            <div className="col-span-full sm:col-span-3">
+              <label
+                htmlFor="work-arrangement"
+                className="text-tremor-default font-medium text-tremor-content-strong dark:text-dark-tremor-content-strong"
+              >
+                Work Arrangement
+              </label>
+              <DataSelector
+                value={formValues.idWorkArrangement}
+                htmlId="work-arrangement"
+                url={`http://localhost:${port}/api/work-arrangements/`}
+                displayField="arrangement"
+                idField="idWorkArrangement"
+                onValueChange={(arrangementId) => {
+                  handleInputChange("idWorkArrangement", arrangementId);
+                }}
+                className="mt-2"
+              />
+            </div>
           </div>
 
-          <Divider className="col-span-full">Enter some optional data</Divider>
-          <div className="col-span-full sm:col-span-3">
-            <label
-              htmlFor="salary"
-              className="text-tremor-default font-medium text-tremor-content-strong dark:text-dark-tremor-content-strong"
-            >
-              Salary
-            </label>
-            <TextInput
-              type="text"
-              id="salary"
-              name="salary"
-              placeholder="Salary"
-              value={formValues.salary ? formValues.salary.toString() : ""}
-              onChange={(e) => {
-                handleNumberChange("salary", e.target.value);
-              }}
-              className="mt-2"
-            />
-          </div>
+          <Divider className="col-span-full">Enter some candidate data</Divider>
+
           <div className="col-span-full sm:col-span-3">
             <label
               htmlFor="GPA"
@@ -479,63 +543,8 @@ const AddOffer: React.FC<AddOfferProps> = ({ port }) => {
               className="mt-2"
             />
           </div>
-          <div className="col-span-full sm:col-span-3">
-            <label
-              htmlFor="office-location"
-              className="text-tremor-default font-medium text-tremor-content-strong dark:text-dark-tremor-content-strong"
-            >
-              Office Location
-            </label>
-            <DataSelector
-              value={formValues.idOfficeLocation}
-              htmlId="office-location"
-              url={`http://localhost:${port}/api/office-locations/`}
-              displayField="fullName"
-              idField="idOfficeLocation"
-              onValueChange={(locationId) => {
-                handleInputChange("idOfficeLocation", locationId);
-              }}
-              className="mt-2"
-            />
-          </div>
-          <div className="col-span-full sm:col-span-3">
-            <label
-              htmlFor="offer-source"
-              className="text-tremor-default font-medium text-tremor-content-strong dark:text-dark-tremor-content-strong"
-            >
-              Offer Source
-            </label>
-            <DataSelector
-              value={formValues.idOfferSource}
-              htmlId="offer-source"
-              url={`http://localhost:${port}/api/offer-sources/`}
-              displayField="type"
-              idField="idOfferSource"
-              onValueChange={(typeId) => {
-                handleInputChange("idOfferSource", typeId);
-              }}
-              className="mt-2"
-            />
-          </div>
-          <div className="col-span-full sm:col-span-3">
-            <label
-              htmlFor="work-arrangement"
-              className="text-tremor-default font-medium text-tremor-content-strong dark:text-dark-tremor-content-strong"
-            >
-              Work Arrangement
-            </label>
-            <DataSelector
-              value={formValues.idWorkArrangement}
-              htmlId="work-arrangement"
-              url={`http://localhost:${port}/api/work-arrangements/`}
-              displayField="arrangement"
-              idField="idWorkArrangement"
-              onValueChange={(arrangementId) => {
-                handleInputChange("idWorkArrangement", arrangementId);
-              }}
-              className="mt-2"
-            />
-          </div>
+
+          
           <div className="col-span-full sm:col-span-3">
             <label
               htmlFor="prior-experience"
